@@ -1,0 +1,54 @@
+{
+  "name": "pikaid",
+  "version": "0.1.0",
+  "description": "Small · Sortable · Secure ID generator for JavaScript",
+  "type": "module",
+  "main": "dist/pikaid.cjs.js",
+  "module": "dist/pikaid.esm.js",
+  "exports": {
+    ".": {
+      "import": "./dist/pikaid.esm.js",
+      "require": "./dist/pikaid.cjs.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pikaid/pikaid-js.git"
+  },
+  "homepage": "https://github.com/pikaid/pikaid-js#readme",
+  "bugs": {
+    "url": "https://github.com/pikaid/pikaid-js/issues"
+  },
+  "keywords": [
+    "pikaid",
+    "id-generator",
+    "base36",
+    "sortable",
+    "secure",
+    "random",
+    "id",
+    "guid",
+    "uuid",
+    "ulid",
+    "url",
+    "rfc4122",
+    "rfc9562"
+  ],
+  "author": "Larananas <larananas.dev@proton.me>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {},
+  "devDependencies": {},
+  "publishConfig": {
+    "access": "public"
+  }
+}
