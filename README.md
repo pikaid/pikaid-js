@@ -2,7 +2,7 @@
   <img src="logo.png" alt="pikaid" width="300" />
 </p>
 
-# Pikaid (Javascript)
+# Pikaid (JavaScript)
 
 **Small · Sortable · Secure ID generator**
 
@@ -15,6 +15,6 @@ Full specifications and other information are avalible at [pikaid/pikaid-specs](
 ---
 ---
 
-# JS pikaid implementation is coming soon...
+# JavaScript pikaid implementation is coming soon...
 ---
 ---

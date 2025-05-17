@@ -1,5 +1,5 @@
 {
-  "name": "pikaid",
+  "name": "pikaid-js",
   "version": "0.1.0",
   "description": "Small · Sortable · Secure ID generator for JavaScript",
   "type": "module",
