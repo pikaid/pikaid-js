@@ -1,2 +1,2 @@
 # pikaid-js
-Small · Sortable · Secure IDs
+JS implementation is coming...
