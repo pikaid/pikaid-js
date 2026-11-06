@@ -1,0 +1,95 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/pikaid/pikaid-php/main/tests/vectors/pikaid-v1.schema.json",
+    "type": "object",
+    "required": [
+        "meta",
+        "valid",
+        "invalid"
+    ],
+    "properties": {
+        "meta": {
+            "type": "object"
+        },
+        "valid": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "name",
+                    "timestamp",
+                    "entropy_hex",
+                    "id",
+                    "bin_hex"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "timestamp": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "entropy_hex": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{24}$"
+                    },
+                    "id": {
+                        "type": "string",
+                        "pattern": "^[0-9a-z]{26}$"
+                    },
+                    "bin_hex": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{34}$"
+                    }
+                }
+            }
+        },
+        "invalid": {
+            "type": "object",
+            "required": [
+                "string",
+                "binary"
+            ],
+            "properties": {
+                "string": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "id"
+                        ],
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "id": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "binary": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "bin_hex"
+                        ],
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "bin_hex": {
+                                "type": "string",
+                                "pattern": "^([0-9a-f]{2})*$"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
