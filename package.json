@@ -1,6 +1,6 @@
 {
   "name": "pikaid",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Official JavaScript and TypeScript implementation of pikaid: 26-character sortable Base36 identifiers with 96-bit cryptographic randomness and 17-byte binary storage.",
   "keywords": [
     "pikaid",
@@ -34,6 +34,7 @@
     "src",
     "LICENSE",
     "README.md",
+    "CHANGELOG.md",
     "logo.png"
   ],
   "sideEffects": false,
@@ -52,8 +53,8 @@
     "build": "node scripts/build.mjs",
     "typecheck": "tsc -p tsconfig.json",
     "typecheck:types": "npm run build && tsc -p tsconfig.type-tests.json",
-    "test": "npm run build && node --test test",
-    "test:coverage": "npm run build && node --experimental-test-coverage --test-coverage-include=\"dist/esm/**\" --test-coverage-lines=90 --test-coverage-functions=90 --test-coverage-branches=85 --test test",
+    "test": "npm run build && node scripts/run-tests.mjs",
+    "test:coverage": "npm run build && node scripts/run-tests.mjs --experimental-test-coverage --test-coverage-include=\"dist/esm/**\" --test-coverage-lines=90 --test-coverage-functions=90 --test-coverage-branches=85",
     "test:browser": "npm run build && node scripts/browser-test.mjs",
     "test:pack": "node scripts/pack-smoke.mjs",
     "prepack": "npm run build"
