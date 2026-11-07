@@ -6,3 +6,5 @@ coverage/
 .ai/run/
 test-results/
 playwright-report/
+
+/.??
