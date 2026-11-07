@@ -75,8 +75,69 @@ try {
     console.log('CommonJS consumer OK');
   `], { cwd: consumerDir });
 
+  // Type-check the packed declarations under both export conditions. The
+  // repository's own type tests use a self-reference, so this is the only check
+  // that proves a real consumer sees the published `import` and `require` types.
+  const consumerTypes = `
+import {
+  MAX_RANDOMNESS,
+  Pikaid,
+  generate,
+  generateAt,
+  toBinary,
+  type PikaidLike,
+} from 'pikaid';
+
+const value: Pikaid = Pikaid.parse(generate());
+const like: PikaidLike[] = [value, value.id, toBinary(value.id)];
+const maximum: bigint = MAX_RANDOMNESS;
+
+// @ts-expect-error timestamps are numbers, not strings
+generateAt('1700000000');
+
+// @ts-expect-error the string form is required here
+toBinary([0, 1]);
+
+void [like, maximum];
+`;
+
+  writeFileSync(path.join(consumerDir, 'consumer.mts'), consumerTypes);
+  writeFileSync(path.join(consumerDir, 'consumer.cts'), consumerTypes);
+  writeFileSync(
+    path.join(consumerDir, 'tsconfig.json'),
+    `${JSON.stringify(
+      {
+        compilerOptions: {
+          target: 'ES2022',
+          lib: ['ES2022'],
+          module: 'NodeNext',
+          moduleResolution: 'NodeNext',
+          strict: true,
+          noEmit: true,
+          skipLibCheck: false,
+          types: [],
+        },
+        include: ['consumer.mts', 'consumer.cts'],
+      },
+      null,
+      2,
+    )}\n`,
+  );
+
+  run(
+    path.join(
+      root,
+      'node_modules',
+      '.bin',
+      process.platform === 'win32' ? 'tsc.cmd' : 'tsc',
+    ),
+    ['-p', 'tsconfig.json'],
+    { cwd: consumerDir, shell: process.platform === 'win32' },
+  );
+
   process.stdout.write(esm);
   process.stdout.write(cjs);
+  console.log('Type declarations (ESM + CJS) OK');
   console.log(`PACKAGING PASS (${tarballs[0]})`);
 } finally {
   rmSync(workspace, { recursive: true, force: true });

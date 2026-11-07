@@ -242,7 +242,7 @@ npm install
 npm run typecheck        # strict TypeScript checking
 npm run build            # dual ESM + CommonJS + declarations
 npm test                 # build, then node:test suites
-npm run test:coverage    # node:test coverage with enforced thresholds
+npm run test:coverage    # Node.js 22+; node:test coverage with enforced thresholds
 npm run typecheck:types  # compile-time contract tests against emitted d.ts
 npm run test:browser     # Playwright: Chromium, Firefox, WebKit
 ```
