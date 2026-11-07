@@ -82,13 +82,14 @@ describe('public API surface', () => {
     const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 
     assert.equal(manifest.name, 'pikaid');
-    assert.match(manifest.version, /^0\.\d+\.\d+$/);
+    assert.match(manifest.version, /^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/);
     assert.equal(manifest.license, 'MIT');
     assert.equal(manifest.type, 'module');
     assert.equal(manifest.sideEffects, false);
     assert.equal(manifest.engines.node, '>=20');
     assert.deepEqual(manifest.dependencies ?? {}, {});
     assert.ok(Array.isArray(manifest.files));
+    assert.ok(manifest.files.includes('CHANGELOG.md'));
 
     for (const relative of [
       manifest.main,

@@ -27,9 +27,11 @@ timestamp     randomness
   `17014d76f568c3ac9f9ce2927c1a018fdbc36d1d`).
 - Conformance: every vector from the official PHP v1.2.0 suite
   (`e3f843edeb5157a5d2d25196cac0d69580810a95`) passes.
+- Release: source version **1.0.0** is prepared. There is no published npm
+  package, git tag, or GitHub release yet.
 - **This package has not been published to npm.** The `pikaid` name is not owned
-  by this repository on the public registry. Build it from source, or install
-  directly from the Git repository, until an official publication is announced.
+  by this repository on the public registry, and this repository is private.
+  Build it from source until an official publication is announced.
 
 ## Install
 
@@ -232,8 +234,10 @@ comparison orders values chronologically by timestamp, then by randomness.
 ## Browser support
 
 The package uses `globalThis.crypto.getRandomValues` and standard ECMAScript
-features. It is tested in Chromium, Firefox, and WebKit through Playwright in
-addition to Node.js.
+features. Continuous integration exercises the built package in Chromium through
+Playwright. The local browser harness can additionally run Firefox and WebKit
+(`BROWSERS=firefox,webkit npm run test:browser`); those engines are not part of
+the CI gate.
 
 ## Development
 

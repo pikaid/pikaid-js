@@ -29,9 +29,9 @@ try {
   mkdirSync(tarballDir, { recursive: true });
   mkdirSync(consumerDir, { recursive: true });
 
-  run(process.platform === 'win32' ? 'npm.cmd' : 'npm', [
+  const packJson = run(process.platform === 'win32' ? 'npm.cmd' : 'npm', [
     'pack',
-    '--silent',
+    '--json',
     '--pack-destination',
     tarballDir,
   ]);
@@ -42,6 +42,45 @@ try {
   }
 
   const tarball = path.join(tarballDir, tarballs[0]);
+
+  // `.gitignore` alone does not exclude a file from the published tarball: npm
+  // always includes some files (package.json, README, LICENSE) and honours the
+  // `files` field for the rest. Assert against npm's own manifest so a tracked
+  // or ignored local artifact can never silently ship.
+  let packedFiles;
+  try {
+    // `prepack` writes build output to stdout before npm emits the JSON
+    // manifest, so start at the line that opens the JSON array.
+    const lines = packJson.split(/\r?\n/);
+    const start = lines.findIndex((line) => line.trim() === '[');
+    const [packResult] = JSON.parse(lines.slice(start).join('\n'));
+    packedFiles = packResult.files.map((entry) => entry.path.split(path.sep).join('/'));
+  } catch (error) {
+    throw new Error(`Could not read npm pack manifest: ${error.message}`);
+  }
+
+  const localOnly = packedFiles.filter((file) => file === '.ai' || file.startsWith('.ai/'));
+  if (localOnly.length > 0) {
+    throw new Error(`Local-only .ai files were packaged: ${localOnly.join(', ')}`);
+  }
+
+  const requiredFiles = [
+    'package.json',
+    'LICENSE',
+    'README.md',
+    'dist/esm/index.js',
+    'dist/esm/index.d.ts',
+    'dist/cjs/index.js',
+    'dist/cjs/index.d.ts',
+  ];
+
+  for (const required of requiredFiles) {
+    if (!packedFiles.includes(required)) {
+      throw new Error(`Required file missing from tarball: ${required}`);
+    }
+  }
+
+  console.log(`PACK CONTENTS OK (${packedFiles.length} files)`);
 
   writeFileSync(
     path.join(consumerDir, 'package.json'),
