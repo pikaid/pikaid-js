@@ -70,13 +70,13 @@ same 26-character format.
 
 ### Fixed
 
-- Test discovery is now portable across Node.js 20, 22, 24 and Windows,
-  macOS and Linux. `node --test test` treated the directory as a module on
+- Test discovery is now portable across Node.js 22 and 24 on Windows, macOS
+  and Linux. `node --test test` treated the directory as a module on
   Node.js 22 and newer.
 
 ### Notes
 
 - This version is prepared for release but has **not** been published to the
-  public npm registry. The `pikaid` package name is not owned by this
-  repository.
-- No runtime dependencies. Requires Node.js 20 or newer.
+  public npm registry. Ownership of the `pikaid` name has not been verified
+  with authorized npm credentials.
+- No runtime dependencies. Requires Node.js 22 or newer.

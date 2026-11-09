@@ -37,9 +37,10 @@ timestamp     randomness
   independent test re-derives every value without importing the implementation.
 - Release: source version **1.0.0** is prepared. There is no published npm
   package, git tag, or GitHub release yet.
-- **This package has not been published to npm.** The `pikaid` name is not owned
-  by this repository on the public registry, and this repository is private.
-  Build it from source until an official publication is announced.
+- **This package has not been published to npm.** Ownership of the `pikaid`
+  name on the public registry has not been verified with authorized npm
+  credentials, and this repository is private. Build it from source until an
+  official publication is announced.
 
 ## Install
 
