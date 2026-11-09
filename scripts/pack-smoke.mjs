@@ -59,9 +59,22 @@ try {
     throw new Error(`Could not read npm pack manifest: ${error.message}`);
   }
 
-  const localOnly = packedFiles.filter((file) => file === '.ai' || file.startsWith('.ai/'));
-  if (localOnly.length > 0) {
-    throw new Error(`Local-only .ai files were packaged: ${localOnly.join(', ')}`);
+  const forbiddenPatterns = [
+    /(^|\/)\.ai(\/|$)/,
+    /(^|\/)node_modules(\/|$)/,
+    /(^|\/)coverage(\/|$)/,
+    /(^|\/)test-results(\/|$)/,
+    /(^|\/)playwright-report(\/|$)/,
+    /(^|\/)\.DS_Store$/,
+    /\.tgz$/,
+  ];
+
+  const forbidden = packedFiles.filter((file) =>
+    forbiddenPatterns.some((pattern) => pattern.test(file)),
+  );
+
+  if (forbidden.length > 0) {
+    throw new Error(`Forbidden local-only files were packaged: ${forbidden.join(', ')}`);
   }
 
   const requiredFiles = [
@@ -94,25 +107,100 @@ try {
   );
 
   const esm = run(process.execPath, ['--input-type=module', '-e', `
-    import { generate, parse, toBinary, fromBinary, isValid, Pikaid, MAX_TIMESTAMP } from 'pikaid';
-    const id = generate();
-    if (!isValid(id) || id.length !== 26) throw new Error('generated id is invalid');
-    const binary = toBinary(id);
-    if (binary.length !== 17) throw new Error('binary length is wrong');
-    if (fromBinary(binary) !== id) throw new Error('binary round-trip failed');
-    if (parse(id).id !== id) throw new Error('parse mismatch');
-    if (Pikaid.fromBinary(binary).timestamp !== parse(id).timestamp) throw new Error('timestamp mismatch');
+    import {
+      MAX_TIMESTAMP,
+      Pikaid,
+      compare,
+      fromBinary,
+      generate,
+      generateAt,
+      isValid,
+      isWellFormed,
+      parse,
+      timestampOf,
+      toBinary,
+    } from 'pikaid';
+
+    const FIXTURE = '0s44we8002loz3po6mcf6vsn23';
+    const FIXTURE_BINARY = '006553f10000112233445566778899aabb';
+    const FIXTURE_TIMESTAMP = 1700000000;
+
+    // README example flow.
+    const generated = generate();
+    if (!isValid(generated) || generated.length !== 26) throw new Error('generated id is invalid');
+    if (parse(generated).randomness.length !== 12) throw new Error('randomness length is wrong');
+    const bytes = toBinary(generated);
+    if (fromBinary(bytes) !== generated) throw new Error('binary round-trip failed');
+    const at = generateAt(1700000000);
+    if (timestampOf(at) !== 1700000000) throw new Error('generateAt timestamp mismatch');
+    if (compare(generateAt(1), generateAt(2)) !== -1) throw new Error('compare is not canonical');
+
+    // Official fixture parity, independent of the implementation's encoder.
+    const fixtureBinary = Buffer.from(toBinary(FIXTURE)).toString('hex');
+    if (fixtureBinary !== FIXTURE_BINARY) throw new Error('fixture binary mismatch');
+    if (fromBinary(Buffer.from(FIXTURE_BINARY, 'hex')) !== FIXTURE) throw new Error('fixture round-trip failed');
+    if (timestampOf(FIXTURE) !== FIXTURE_TIMESTAMP) throw new Error('fixture timestamp mismatch');
+    if (!isWellFormed(FIXTURE) || !isValid(FIXTURE)) throw new Error('fixture is not valid');
+    if (Pikaid.fromBinary(Buffer.from(FIXTURE_BINARY, 'hex')).id !== FIXTURE) throw new Error('fixture class mismatch');
     if (MAX_TIMESTAMP !== 78364164095) throw new Error('constant mismatch');
-    console.log('ESM consumer OK');
+
+    console.log(JSON.stringify({
+      id: FIXTURE,
+      timestamp: timestampOf(FIXTURE),
+      binary: fixtureBinary,
+      roundTrip: fromBinary(toBinary(FIXTURE)),
+      wellFormed: isWellFormed(FIXTURE),
+      valid: isValid(FIXTURE),
+    }));
   `], { cwd: consumerDir });
 
   const cjs = run(process.execPath, ['-e', `
-    const { generate, isValid, toBinary, fromBinary } = require('pikaid');
-    const id = generate();
-    if (!isValid(id)) throw new Error('generated id is invalid');
-    if (fromBinary(toBinary(id)) !== id) throw new Error('binary round-trip failed');
-    console.log('CommonJS consumer OK');
+    const {
+      MAX_TIMESTAMP,
+      Pikaid,
+      compare,
+      fromBinary,
+      generate,
+      generateAt,
+      isValid,
+      isWellFormed,
+      parse,
+      timestampOf,
+      toBinary,
+    } = require('pikaid');
+
+    const FIXTURE = '0s44we8002loz3po6mcf6vsn23';
+    const FIXTURE_BINARY = '006553f10000112233445566778899aabb';
+    const FIXTURE_TIMESTAMP = 1700000000;
+
+    const generated = generate();
+    if (!isValid(generated) || generated.length !== 26) throw new Error('generated id is invalid');
+    if (parse(generated).randomness.length !== 12) throw new Error('randomness length is wrong');
+    if (fromBinary(toBinary(generated)) !== generated) throw new Error('binary round-trip failed');
+    if (timestampOf(generateAt(1700000000)) !== 1700000000) throw new Error('generateAt timestamp mismatch');
+    if (compare(generateAt(1), generateAt(2)) !== -1) throw new Error('compare is not canonical');
+
+    const fixtureBinary = Buffer.from(toBinary(FIXTURE)).toString('hex');
+    if (fixtureBinary !== FIXTURE_BINARY) throw new Error('fixture binary mismatch');
+    if (fromBinary(Buffer.from(FIXTURE_BINARY, 'hex')) !== FIXTURE) throw new Error('fixture round-trip failed');
+    if (timestampOf(FIXTURE) !== FIXTURE_TIMESTAMP) throw new Error('fixture timestamp mismatch');
+    if (!isWellFormed(FIXTURE) || !isValid(FIXTURE)) throw new Error('fixture is not valid');
+    if (Pikaid.fromBinary(Buffer.from(FIXTURE_BINARY, 'hex')).id !== FIXTURE) throw new Error('fixture class mismatch');
+    if (MAX_TIMESTAMP !== 78364164095) throw new Error('constant mismatch');
+
+    console.log(JSON.stringify({
+      id: FIXTURE,
+      timestamp: timestampOf(FIXTURE),
+      binary: fixtureBinary,
+      roundTrip: fromBinary(toBinary(FIXTURE)),
+      wellFormed: isWellFormed(FIXTURE),
+      valid: isValid(FIXTURE),
+    }));
   `], { cwd: consumerDir });
+
+  if (esm.trim() !== cjs.trim()) {
+    throw new Error(`ESM and CommonJS fixture output differs:\nESM: ${esm}\nCJS: ${cjs}`);
+  }
 
   // Type-check the packed declarations under both export conditions. The
   // repository's own type tests use a self-reference, so this is the only check
@@ -131,13 +219,16 @@ const value: Pikaid = Pikaid.parse(generate());
 const like: PikaidLike[] = [value, value.id, toBinary(value.id)];
 const maximum: bigint = MAX_RANDOMNESS;
 
+const documented: Pikaid = Pikaid.parse('0s44we8002loz3po6mcf6vsn23');
+const documentedAccepted: PikaidLike[] = [documented, documented.id, documented.toBinary()];
+
 // @ts-expect-error timestamps are numbers, not strings
 generateAt('1700000000');
 
 // @ts-expect-error the string form is required here
 toBinary([0, 1]);
 
-void [like, maximum];
+void [like, maximum, documentedAccepted];
 `;
 
   writeFileSync(path.join(consumerDir, 'consumer.mts'), consumerTypes);
@@ -174,8 +265,9 @@ void [like, maximum];
     { cwd: consumerDir, shell: process.platform === 'win32' },
   );
 
-  process.stdout.write(esm);
-  process.stdout.write(cjs);
+  console.log('ESM consumer OK');
+  console.log('CommonJS consumer OK');
+  console.log('ESM/CJS fixture parity OK');
   console.log('Type declarations (ESM + CJS) OK');
   console.log(`PACKAGING PASS (${tarballs[0]})`);
 } finally {

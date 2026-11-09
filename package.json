@@ -39,7 +39,7 @@
   ],
   "sideEffects": false,
   "engines": {
-    "node": ">=20"
+    "node": ">=22.0.0"
   },
   "repository": {
     "type": "git",
@@ -57,6 +57,7 @@
     "test:coverage": "npm run build && node scripts/run-tests.mjs --experimental-test-coverage --test-coverage-include=\"dist/esm/**\" --test-coverage-lines=90 --test-coverage-functions=90 --test-coverage-branches=85",
     "test:browser": "npm run build && node scripts/browser-test.mjs",
     "test:pack": "node scripts/pack-smoke.mjs",
+    "test:archive": "node scripts/archive-smoke.mjs",
     "prepack": "npm run build"
   },
   "devDependencies": {

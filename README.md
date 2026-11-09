@@ -26,7 +26,10 @@ timestamp     randomness
 - Specification: pikaid **1.0.4** (pinned at commit
   `17014d76f568c3ac9f9ce2927c1a018fdbc36d1d`).
 - Conformance: every vector from the official PHP v1.2.0 suite
-  (`e3f843edeb5157a5d2d25196cac0d69580810a95`) passes.
+  (`e3f843edeb5157a5d2d25196cac0d69580810a95`) passes. The copied fixture bytes
+  are pinned by SHA-256 (`b0c9dfdd063613424414fef5c9065fbd2f81d645d0ab42b34e27cde715613500`;
+  schema `4441d4dbaa6c5450ae9cbfb2438c53bc0421bba2b7fcc9ef9b158e5d1de0759e`), and an
+  independent test re-derives every value without importing the implementation.
 - Release: source version **1.0.0** is prepared. There is no published npm
   package, git tag, or GitHub release yet.
 - **This package has not been published to npm.** The `pikaid` name is not owned
@@ -45,8 +48,9 @@ npm run build
 Then use the package from another local project with a file dependency, or
 `npm install /path/to/pikaid-js`.
 
-Requires **Node.js 20 or newer**. Modern browsers with Web Crypto are supported.
-The package has **zero runtime dependencies**.
+Requires **Node.js 22 or newer**. Node.js 22 is in maintenance until
+2027-04-30; Node.js 24 and 26 are recommended. Modern browsers with Web Crypto
+are supported. The package has **zero runtime dependencies**.
 
 ## Usage
 
@@ -249,6 +253,8 @@ npm test                 # build, then node:test suites
 npm run test:coverage    # Node.js 22+; node:test coverage with enforced thresholds
 npm run typecheck:types  # compile-time contract tests against emitted d.ts
 npm run test:browser     # Playwright: Chromium, Firefox, WebKit
+npm run test:pack        # npm tarball contents and packed ESM/CJS consumers
+npm run test:archive     # git archive hygiene against a committed ref
 ```
 
 Conformance fixtures live in `test/vectors/`; see

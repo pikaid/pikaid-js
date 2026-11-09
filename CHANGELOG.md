@@ -11,6 +11,27 @@ same 26-character format.
 
 ## [Unreleased]
 
+### Added
+
+- Independent conformance matrix that re-derives every official vector with a
+  separate Base36/byte implementation and pins the upstream fixture and schema
+  SHA-256 digests.
+- `npm run test:archive`, a `git archive` hygiene gate for tracked local-only,
+  build, cache, and test-artifact paths.
+
+### Changed
+
+- Minimum supported Node.js is now **22** (Node.js 20 is end-of-life). CI runs
+  Node.js 22, 24, and 26 on Linux plus Node.js 24 on Windows and macOS.
+- Packed-consumer smoke tests now execute the documented README flow and require
+  identical official-fixture output from the ESM and CommonJS entry points.
+
+### Fixed
+
+- `.gitignore` again uses the explicit root rule `/.ai/` instead of the
+  overbroad hidden-directory pattern, which could also hide repository
+  configuration such as `.github/`.
+
 ## [1.0.0] - 2026-11-07
 
 ### Added

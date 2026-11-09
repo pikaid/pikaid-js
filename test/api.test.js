@@ -86,7 +86,8 @@ describe('public API surface', () => {
     assert.equal(manifest.license, 'MIT');
     assert.equal(manifest.type, 'module');
     assert.equal(manifest.sideEffects, false);
-    assert.equal(manifest.engines.node, '>=20');
+    assert.equal(manifest.engines.node, '>=22.0.0');
+    assert.match(manifest.scripts['test:archive'], /archive-smoke\.mjs$/);
     assert.deepEqual(manifest.dependencies ?? {}, {});
     assert.ok(Array.isArray(manifest.files));
     assert.ok(manifest.files.includes('CHANGELOG.md'));

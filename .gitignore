@@ -6,4 +6,6 @@ coverage/
 test-results/
 playwright-report/
 
-/.??/
+# Local agent workspace. Keep this explicit: a broad hidden-directory pattern
+# would also hide repository configuration such as `.github/`.
+/.ai/
