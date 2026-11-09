@@ -3,6 +3,7 @@ dist/
 coverage/
 *.tgz
 .DS_Store
-/.ai/
 test-results/
 playwright-report/
+
+/.??/
