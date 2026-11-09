@@ -13,16 +13,29 @@ same 26-character format.
 
 ### Added
 
-- Independent conformance matrix that re-derives every official vector with a
-  separate Base36/byte implementation and pins the upstream fixture and schema
-  SHA-256 digests.
+- Official PikaID conformance integration against `pikaid/pikaid-specs`
+  package revision 1.0.0 / spec revision 1.0.4, pinned to exact commit
+  `059780cc0e5b113443812720d95c630649bf3aa3`. The suite is fetched into the
+  ignored `.ai/run/` workspace and never vendored.
+- Test-only JSON-Lines adapters for the built ESM and CommonJS entry points.
+  Both delegate to the real public API; no encoding or validation logic is
+  reimplemented. All genuinely exposed optional capabilities are advertised,
+  while `csprng_failure_injection` remains a documented manual audit because the
+  package has no injectable public RNG seam.
+- `npm run test:official`, which verifies fixture integrity and identity, runs
+  the suite's negative-control self-tests and independent Node.js oracle, and
+  passes the official automated runner through both module formats.
 - `npm run test:archive`, a `git archive` hygiene gate for tracked local-only,
   build, cache, and test-artifact paths.
+- `.gitattributes` normalizing source, workflow, and adapter text files to LF.
 
 ### Changed
 
 - Minimum supported Node.js is now **22** (Node.js 20 is end-of-life). CI runs
   Node.js 22, 24, and 26 on Linux plus Node.js 24 on Windows and macOS.
+- CI now triggers on every branch push (and pull requests), runs the official
+  conformance job, and exercises Chromium, Firefox, and WebKit rather than
+  Chromium alone.
 - Packed-consumer smoke tests now execute the documented README flow and require
   identical official-fixture output from the ESM and CommonJS entry points.
 

@@ -25,9 +25,14 @@ timestamp     randomness
 
 - Specification: pikaid **1.0.4** (pinned at commit
   `17014d76f568c3ac9f9ce2927c1a018fdbc36d1d`).
-- Conformance: every vector from the official PHP v1.2.0 suite
-  (`e3f843edeb5157a5d2d25196cac0d69580810a95`) passes. The copied fixture bytes
-  are pinned by SHA-256 (`b0c9dfdd063613424414fef5c9065fbd2f81d645d0ab42b34e27cde715613500`;
+- Conformance: every automated check in the official PikaID conformance suite
+  (`pikaid/pikaid-specs`, package revision **1.0.0**, spec revision **1.0.4**,
+  status `OFFICIAL`, pinned at commit
+  `059780cc0e5b113443812720d95c630649bf3aa3`) passes for both the ESM and
+  CommonJS entry points: 596 valid, 258 invalid-string, 33 invalid-binary,
+  186 ordering, 12 generation, and 15 properties cases. The copied PHP v1.2.0
+  fixture bytes in `test/vectors/` remain as an offline auxiliary regression,
+  pinned by SHA-256 (`b0c9dfdd063613424414fef5c9065fbd2f81d645d0ab42b34e27cde715613500`;
   schema `4441d4dbaa6c5450ae9cbfb2438c53bc0421bba2b7fcc9ef9b158e5d1de0759e`), and an
   independent test re-derives every value without importing the implementation.
 - Release: source version **1.0.0** is prepared. There is no published npm
@@ -238,10 +243,8 @@ comparison orders values chronologically by timestamp, then by randomness.
 ## Browser support
 
 The package uses `globalThis.crypto.getRandomValues` and standard ECMAScript
-features. Continuous integration exercises the built package in Chromium through
-Playwright. The local browser harness can additionally run Firefox and WebKit
-(`BROWSERS=firefox,webkit npm run test:browser`); those engines are not part of
-the CI gate.
+features. Continuous integration exercises the built package in Chromium,
+Firefox, and WebKit through Playwright.
 
 ## Development
 
@@ -255,10 +258,22 @@ npm run typecheck:types  # compile-time contract tests against emitted d.ts
 npm run test:browser     # Playwright: Chromium, Firefox, WebKit
 npm run test:pack        # npm tarball contents and packed ESM/CJS consumers
 npm run test:archive     # git archive hygiene against a committed ref
+npm run test:official    # pinned official PikaID conformance suite (needs Python 3.11+)
 ```
 
-Conformance fixtures live in `test/vectors/`; see
-[`test/vectors/README.md`](test/vectors/README.md) for provenance.
+`npm run test:official` fetches `pikaid/pikaid-specs` at the exact committed
+revision into the ignored `.ai/run/` directory, verifies the fixture package
+identity and integrity, runs the suite's own negative-control self-tests and
+independent Node.js oracle, builds this package, and runs the JSON-Lines adapter
+through both module entry points. It exits 0 only when every automated check
+passes. The runner still records the CSPRNG source and failure-path reviews as
+outstanding manual audits: an automated pass is **not** a conformance
+certification.
+
+Conformance fixtures for the auxiliary offline regression live in
+`test/vectors/`; see [`test/vectors/README.md`](test/vectors/README.md) for
+provenance. The authoritative conformance gate is the pinned upstream suite, not
+those copied fixtures.
 
 ## License
 

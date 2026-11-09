@@ -55,6 +55,7 @@
     "typecheck:types": "npm run build && tsc -p tsconfig.type-tests.json",
     "test": "npm run build && node scripts/run-tests.mjs",
     "test:coverage": "npm run build && node scripts/run-tests.mjs --experimental-test-coverage --test-coverage-include=\"dist/esm/**\" --test-coverage-lines=90 --test-coverage-functions=90 --test-coverage-branches=85",
+    "test:official": "node scripts/official-conformance.mjs",
     "test:browser": "npm run build && node scripts/browser-test.mjs",
     "test:pack": "node scripts/pack-smoke.mjs",
     "test:archive": "node scripts/archive-smoke.mjs",
