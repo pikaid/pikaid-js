@@ -1,8 +1,9 @@
 {
-  "name": "pikaid",
+  "name": "pikaid-js",
   "version": "1.0.0",
   "description": "Official JavaScript and TypeScript implementation of pikaid: 26-character sortable Base36 identifiers with 96-bit cryptographic randomness and 17-byte binary storage.",
   "keywords": [
+    "pikaid-js",
     "pikaid",
     "identifier",
     "unique-id",
