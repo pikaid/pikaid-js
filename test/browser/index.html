@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>pikaid browser conformance tests</title>
+  </head>
+  <body>
+    <pre id="output">running…</pre>
+    <script type="module">
+      import {
+        MAX_TIMESTAMP,
+        Pikaid,
+        compare,
+        fromBinary,
+        fromParts,
+        generate,
+        generateAt,
+        isValid,
+        isWellFormed,
+        parse,
+        randomnessOf,
+        timestampOf,
+        toBinary,
+      } from '/dist/esm/index.js';
+
+      const results = [];
+
+      function check(name, fn) {
+        try {
+          fn();
+          results.push({ name, ok: true });
+        } catch (error) {
+          results.push({
+            name,
+            ok: false,
+            error: error && error.stack ? String(error.stack) : String(error),
+          });
+        }
+      }
+
+      function assert(condition, message) {
+        if (!condition) {
+          throw new Error(message || 'assertion failed');
+        }
+      }
+
+      function equal(actual, expected, message) {
+        if (actual !== expected) {
+          throw new Error(`${message || 'not equal'}: expected ${expected}, got ${actual}`);
+        }
+      }
+
+      function throwsCode(fn, code) {
+        try {
+          fn();
+        } catch (error) {
+          equal(error.code, code, 'error code');
+          return;
+        }
+        throw new Error(`expected PikaidError ${code}`);
+      }
+
+      function hex(bytes) {
+        return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+      }
+
+      check('Web Crypto CSPRNG is available', () => {
+        assert(globalThis.crypto, 'globalThis.crypto missing');
+        equal(typeof globalThis.crypto.getRandomValues, 'function');
+      });
+
+      check('generates a valid id at the current second', () => {
+        const before = Math.floor(Date.now() / 1000);
+        const id = generate();
+        const after = Math.floor(Date.now() / 1000);
+
+        equal(id.length, 26);
+        equal(isValid(id), true);
+        assert(timestampOf(id) >= before && timestampOf(id) <= after);
+      });
+
+      check('official sample vector round-trips', () => {
+        const id = '0s44we8002loz3po6mcf6vsn23';
+        const binary = toBinary(id);
+
+        equal(timestampOf(id), 1_700_000_000);
+        equal(hex(randomnessOf(id)), '00112233445566778899aabb');
+        equal(hex(binary), '006553f10000112233445566778899aabb');
+        equal(fromBinary(binary), id);
+        equal(parse(id).id, id);
+        equal(Pikaid.fromBinary(binary).id, id);
+      });
+
+      check('maximum timestamp and randomness round-trip', () => {
+        const id = fromParts(MAX_TIMESTAMP, new Uint8Array(12).fill(0xff));
+
+        equal(id, 'zzzzzzz7oiylpimjg5u2ca1ypr');
+        equal(timestampOf(id), MAX_TIMESTAMP);
+        equal(isValid(id), true);
+      });
+
+      check('rejects malformed values without coercion', () => {
+        equal(isValid('0000000' + 'z'.repeat(19)), false);
+        equal(isWellFormed('0000000' + 'z'.repeat(19)), true);
+        throwsCode(() => parse('0000000' + 'z'.repeat(19)), 'RANDOMNESS_OVERFLOW');
+        throwsCode(() => parse('0S44WE8002LOZ3PO6MCF6VSN23'), 'INVALID_CHARACTER');
+        throwsCode(() => parse('0000000000000000000000000'), 'INVALID_LENGTH');
+        throwsCode(() => generateAt(-1), 'TIMESTAMP_OUT_OF_RANGE');
+      });
+
+      check('rejects binary timestamp overflow', () => {
+        const overflow = new Uint8Array(17);
+        overflow.set([0x12, 0x3e, 0xde, 0x40, 0x00], 0);
+        throwsCode(() => fromBinary(overflow), 'TIMESTAMP_OVERFLOW');
+      });
+
+      check('orders values consistently', () => {
+        const low = fromParts(1, new Uint8Array(12));
+        const high = fromParts(1, new Uint8Array(12).fill(0xff));
+        const next = fromParts(2, new Uint8Array(12));
+
+        equal(compare(low, high), -1);
+        equal(compare(high, high), 0);
+        equal(compare(high, next), -1);
+        equal(compare(low, toBinary(low)), 0);
+        assert(low < high);
+      });
+
+      check('generated values are distinct', () => {
+        assert(generate() !== generate());
+        assert(generateAt(1) !== generateAt(1));
+      });
+
+      const output = document.getElementById('output');
+      const failed = results.filter((result) => !result.ok);
+      output.textContent = results
+        .map((result) => `${result.ok ? 'ok' : 'not ok'} - ${result.name}`)
+        .join('\n');
+
+      window.__browserResult = {
+        ok: failed.length === 0,
+        results,
+      };
+    </script>
+  </body>
+</html>

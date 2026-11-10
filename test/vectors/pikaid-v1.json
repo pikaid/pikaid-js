@@ -1,0 +1,99 @@
+{
+  "meta": {
+    "project": "pikaid",
+    "string_length": 26,
+    "timestamp": {
+      "encoding": "base36-lower",
+      "chars": 7,
+      "min": 0,
+      "max": 78364164095
+    },
+    "entropy": {
+      "bytes": 12,
+      "encoding": "base36-lower",
+      "chars": 19
+    },
+    "binary": {
+      "bytes": 17,
+      "layout": "[5 bytes timestamp big-endian][12 bytes entropy]"
+    },
+    "spec_revision": "1.0.4",
+    "identifier_format": "immutable and unversioned"
+  },
+  "valid": [
+    {
+      "name": "all-zero",
+      "timestamp": 0,
+      "entropy_hex": "000000000000000000000000",
+      "id": "00000000000000000000000000",
+      "bin_hex": "0000000000000000000000000000000000"
+    },
+    {
+      "name": "max-values",
+      "timestamp": 78364164095,
+      "entropy_hex": "ffffffffffffffffffffffff",
+      "id": "zzzzzzz7oiylpimjg5u2ca1ypr",
+      "bin_hex": "123ede3fffffffffffffffffffffffffff"
+    },
+    {
+      "name": "sample-1700000000",
+      "timestamp": 1700000000,
+      "entropy_hex": "00112233445566778899aabb",
+      "id": "0s44we8002loz3po6mcf6vsn23",
+      "bin_hex": "006553f10000112233445566778899aabb"
+    },
+    {
+      "name": "ts-1-entropy-1",
+      "timestamp": 1,
+      "entropy_hex": "000000000000000000000001",
+      "id": "00000010000000000000000001",
+      "bin_hex": "0000000001000000000000000000000001"
+    }
+  ],
+  "invalid": {
+    "string": [
+      {
+        "name": "too-short",
+        "id": "0000000000000000000000000"
+      },
+      {
+        "name": "too-long",
+        "id": "000000000000000000000000000"
+      },
+      {
+        "name": "uppercase",
+        "id": "000000A0000000000000000000"
+      },
+      {
+        "name": "invalid-char-dash",
+        "id": "000000-0000000000000000000"
+      },
+      {
+        "name": "non-base36",
+        "id": "000000_0000000000000000000"
+      },
+      {
+        "name": "entropy-overflow",
+        "id": "0000000zzzzzzzzzzzzzzzzzzz"
+      }
+    ],
+    "binary": [
+      {
+        "name": "too-short",
+        "bin_hex": "00000000000000000000000000000000"
+      },
+      {
+        "name": "too-long",
+        "bin_hex": "000000000000000000000000000000000000"
+      },
+      {
+        "name": "timestamp-overflow",
+        "bin_hex": "123ede4000000000000000000000000000"
+      },
+      {
+        "name": "timestamp-overflow-max-40-bit",
+        "bin_hex": "ffffffffff000000000000000000000000"
+      }
+    ]
+  }
+}
