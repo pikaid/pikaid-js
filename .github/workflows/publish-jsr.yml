@@ -1,0 +1,51 @@
+name: Publish to JSR
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jsr-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Verify and publish TypeScript to JSR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out release commit
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Install reproducible npm dependencies
+        run: npm ci
+
+      - name: Run unit tests and type verification
+        run: |
+          npm test
+          npm run typecheck:types
+
+      - name: Prepare JSR TypeScript distribution from release tag
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: node scripts/prepare-jsr.mjs
+
+      - name: Validate JSR publishing rules without upload
+        run: npx --yes jsr@0.14.3 publish --dry-run
+
+      - name: Publish with GitHub OIDC
+        run: npx --yes jsr@0.14.3 publish

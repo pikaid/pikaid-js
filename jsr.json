@@ -1,0 +1,15 @@
+{
+  "name": "@pikaid/pikaid",
+  "version": "1.0.0",
+  "exports": "./jsr-src/index.ts",
+  "publish": {
+    "include": [
+      "LICENSE",
+      "README.md",
+      "jsr-src/**/*.ts"
+    ],
+    "exclude": [
+      "!jsr-src"
+    ]
+  }
+}
