@@ -119,7 +119,7 @@ try {
       parse,
       timestampOf,
       toBinary,
-    } from 'pikaid';
+    } from 'pikaid-js';
 
     const FIXTURE = '0s44we8002loz3po6mcf6vsn23';
     const FIXTURE_BINARY = '006553f10000112233445566778899aabb';
@@ -167,7 +167,7 @@ try {
       parse,
       timestampOf,
       toBinary,
-    } = require('pikaid');
+    } = require('pikaid-js');
 
     const FIXTURE = '0s44we8002loz3po6mcf6vsn23';
     const FIXTURE_BINARY = '006553f10000112233445566778899aabb';
@@ -213,7 +213,7 @@ import {
   generateAt,
   toBinary,
   type PikaidLike,
-} from 'pikaid';
+} from 'pikaid-js';
 
 const value: Pikaid = Pikaid.parse(generate());
 const like: PikaidLike[] = [value, value.id, toBinary(value.id)];

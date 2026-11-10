@@ -50,7 +50,13 @@ Firefox, and WebKit through Playwright.
 
 ## 📦 Installation
 
-The npm registry package is not assumed to be published. Build from this repository first:
+Install from npm:
+
+```sh
+npm install pikaid-js
+```
+
+To build from source instead:
 
 ```sh
 git clone https://github.com/pikaid/pikaid-js.git
@@ -59,14 +65,14 @@ npm install
 npm run build
 ```
 
-From your **separate consumer project**, install the built local package with `npm install /absolute/path/to/pikaid-js`. Its package name is `pikaid`.
+From your **separate consumer project**, install the built local package with `npm install /absolute/path/to/pikaid-js`. Its package name is `pikaid-js`.
 
 ## 🚀 Basic Usage
 
 Save this as `main.mjs` in that consumer project, then run `node main.mjs`:
 
 ```js
-import { generate, parse, isValid, toBinary, fromBinary } from 'pikaid';
+import { generate, parse, isValid, toBinary, fromBinary } from 'pikaid-js';
 
 const id = generate();
 const bytes = toBinary(id);
@@ -199,7 +205,7 @@ import {
   fromBinary,
   timestampOf,
   compare,
-} from 'pikaid';
+} from 'pikaid-js';
 
 const id = generate();
 // '0s44we8002loz3po6mcf6vsn23' (example shape)
@@ -224,7 +230,7 @@ const {
   parse,
   isValid,
   PikaidError,
-} = require('pikaid');
+} = require('pikaid-js');
 
 const id = generate();
 console.log(parse(id).id, isValid(id));
@@ -237,7 +243,7 @@ supported through the export map, including `node16`/`nodenext` module
 resolution.
 
 ```ts
-import { Pikaid, type PikaidLike } from 'pikaid';
+import { Pikaid, type PikaidLike } from 'pikaid-js';
 
 const value: Pikaid = Pikaid.parse('0s44we8002loz3po6mcf6vsn23');
 const accepted: PikaidLike[] = [value, value.id, value.toBinary()];

@@ -30,7 +30,7 @@ import {
   type PikaidComparison,
   type PikaidErrorCode,
   type PikaidLike,
-} from 'pikaid';
+} from 'pikaid-js';
 
 const id: string = generate();
 const generatedAt: string = generateAt(1_700_000_000);

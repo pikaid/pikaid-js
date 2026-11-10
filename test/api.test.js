@@ -3,7 +3,7 @@ import { readFileSync, statSync } from 'node:fs';
 import { describe, it } from 'node:test';
 
 import * as direct from '../dist/esm/index.js';
-import * as self from 'pikaid';
+import * as self from 'pikaid-js';
 import {
   BINARY_LENGTH,
   ID_LENGTH,
@@ -73,7 +73,7 @@ describe('public API surface', () => {
     assert.equal(self.Pikaid, direct.Pikaid);
     assert.equal(self.MAX_TIMESTAMP, MAX_TIMESTAMP);
 
-    await assert.rejects(import('pikaid/dist/esm/index.js'), {
+    await assert.rejects(import('pikaid-js/dist/esm/index.js'), {
       code: 'ERR_PACKAGE_PATH_NOT_EXPORTED',
     });
   });
@@ -81,7 +81,7 @@ describe('public API surface', () => {
   it('declares conventional package metadata and existing entry points', () => {
     const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 
-    assert.equal(manifest.name, 'pikaid');
+    assert.equal(manifest.name, 'pikaid-js');
     assert.match(manifest.version, /^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/);
     assert.equal(manifest.license, 'MIT');
     assert.equal(manifest.type, 'module');

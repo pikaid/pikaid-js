@@ -3,7 +3,7 @@
 const assert = require('node:assert/strict');
 const { describe, it } = require('node:test');
 
-const pikaid = require('pikaid');
+const pikaid = require('pikaid-js');
 
 describe('CommonJS entry point', () => {
   it('exports the same public surface', () => {
@@ -64,10 +64,10 @@ describe('CommonJS entry point', () => {
   });
 
   it('resolves package metadata without exposing internals', () => {
-    const manifest = require('pikaid/package.json');
-    assert.equal(manifest.name, 'pikaid');
+    const manifest = require('pikaid-js/package.json');
+    assert.equal(manifest.name, 'pikaid-js');
 
-    assert.throws(() => require('pikaid/dist/cjs/base36.js'), {
+    assert.throws(() => require('pikaid-js/dist/cjs/base36.js'), {
       code: 'ERR_PACKAGE_PATH_NOT_EXPORTED',
     });
   });
