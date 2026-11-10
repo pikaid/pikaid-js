@@ -1,122 +1,93 @@
 <p align="center">
-  <img src="logo.png" alt="pikaid logo" width="230">
+  <a href="https://github.com/pikaid/pikaid-specs">
+    <img src="https://raw.githubusercontent.com/pikaid/pikaid-specs/v1.0.4/logo.png" alt="pikaid" width="300">
+  </a>
 </p>
 
-# pikaid for JavaScript and TypeScript
+<p align="center">
+  <strong>Small · Sortable · Secure ID generator</strong>
+</p>
 
-<p align="center"><strong>Small · Sortable · Secure IDs</strong></p>
+<div align="center">
 
-The official JavaScript and TypeScript implementation of **pikaid**, conformant
-with canonical specification revision **1.0.4**.
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![JavaScript / TypeScript](https://img.shields.io/badge/language-JavaScript%20%2F%20TypeScript-F7DF1E.svg)](https://github.com/pikaid/pikaid-js)
+[![CI](https://github.com/pikaid/pikaid-js/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/pikaid/pikaid-js/actions/workflows/ci.yml)
+[![Official implementation](https://img.shields.io/badge/official-implementation-2e7d32.svg)](https://github.com/pikaid/pikaid-specs)
+[![Specification 1.0.4](https://img.shields.io/badge/spec-1.0.4-4b56a6.svg)](https://github.com/pikaid/pikaid-specs/tree/v1.0.4)
 
-A pikaid is a **26-character lowercase Base36 identifier**: a 7-character Unix
-timestamp in seconds followed by 19 characters encoding **96 bits of
-cryptographic randomness**. Every identifier also has an equivalent **17-byte
-binary form** for compact storage.
+</div>
 
-```text
-0s44we8002loz3po6mcf6vsn23
-└─────┘└─────────────────┘
-  7             19
-timestamp     randomness
-```
+**pikaid** is the **official JavaScript / TypeScript implementation** of a compact, chronologically sortable, collision-resistant identifier format for databases, APIs, and distributed systems.
 
-## Status
+This is the immutable, unversioned [pikaid format](https://github.com/pikaid/pikaid-specs/tree/v1.0.4), documented in specification revision **1.0.4**.
 
-- Specification: pikaid **1.0.4** (pinned at commit
-  `17014d76f568c3ac9f9ce2927c1a018fdbc36d1d`).
-- Conformance: every automated check in the official PikaID conformance suite
-  (`pikaid/pikaid-specs`, package revision **1.0.0**, spec revision **1.0.4**,
-  status `OFFICIAL`, pinned at commit
-  `059780cc0e5b113443812720d95c630649bf3aa3`) passes for both the ESM and
-  CommonJS entry points: 596 valid, 258 invalid-string, 33 invalid-binary,
-  186 ordering, 12 generation, and 15 properties cases. The copied PHP v1.2.0
-  fixture bytes in `test/vectors/` remain as an offline auxiliary regression,
-  pinned by SHA-256 (`b0c9dfdd063613424414fef5c9065fbd2f81d645d0ab42b34e27cde715613500`;
-  schema `4441d4dbaa6c5450ae9cbfb2438c53bc0421bba2b7fcc9ef9b158e5d1de0759e`), and an
-  independent test re-derives every value without importing the implementation.
-- Release: source version **1.0.0** is prepared. There is no published npm
-  package, git tag, or GitHub release yet.
-- **This package has not been published to npm.** Ownership of the `pikaid`
-  name on the public registry has not been verified with authorized npm
-  credentials, and this repository is private. Build it from source until an
-  official publication is announced.
+## ✨ Why pikaid?
 
-## Install
+- **Short:** Compact, readable IDs for URLs, logs, and API resources.
+- **Sortable:** Lexicographically ordered by timestamp, with **one-second precision**.
+- **Collision-resistant:** 96 bits of cryptographic randomness make collisions extremely unlikely, never impossible.
+- **Storage-friendly:** Use `BINARY(17)` or readable `CHAR(26)`.
+- **Distributed-friendly:** No central sequence generator or coordination required.
 
-From a checkout:
+## 🧬 Identifier format
+
+A pikaid contains **26 lowercase Base36 characters**: a **7-character Unix-seconds timestamp** followed by **19 characters encoding 96 bits of cryptographic randomness**. Its binary form is **17 bytes**: 5 unsigned big-endian timestamp bytes followed by 12 randomness bytes.
+
+![Identifier structure](https://raw.githubusercontent.com/pikaid/pikaid-specs/v1.0.4/structure.svg)
+
+> **Ordering:** Different seconds sort chronologically. Within the same second, randomness—not issuance order—decides the order.
+
+> **Security:** These are identifiers, **not secrets**, session credentials, authentication tokens, or API keys.
+
+## ⚙️ Requirements
+
+Node.js 22+ or a modern browser with Web Crypto. The package has no runtime dependencies.
+
+The package uses `globalThis.crypto.getRandomValues` and standard ECMAScript
+features. Continuous integration exercises the built package in Chromium,
+Firefox, and WebKit through Playwright.
+
+## 📦 Installation
+
+The npm registry package is not assumed to be published. Build from this repository first:
 
 ```sh
+git clone https://github.com/pikaid/pikaid-js.git
+cd pikaid-js
 npm install
 npm run build
 ```
 
-Then use the package from another local project with a file dependency, or
-`npm install /path/to/pikaid-js`.
+From your **separate consumer project**, install the built local package with `npm install /absolute/path/to/pikaid-js`. Its package name is `pikaid`.
 
-Requires **Node.js 22 or newer**. Node.js 22 is in maintenance until
-2027-04-30; Node.js 24 and 26 are recommended. Modern browsers with Web Crypto
-are supported. The package has **zero runtime dependencies**.
+## 🚀 Basic Usage
 
-## Usage
-
-### ESM
+Save this as `main.mjs` in that consumer project, then run `node main.mjs`:
 
 ```js
-import {
-  generate,
-  generateAt,
-  parse,
-  isValid,
-  toBinary,
-  fromBinary,
-  timestampOf,
-  compare,
-} from 'pikaid';
+import { generate, parse, isValid, toBinary, fromBinary } from 'pikaid';
 
 const id = generate();
-// '0s44we8002loz3po6mcf6vsn23' (example shape)
-
-parse(id).timestamp;        // number, Unix seconds
-parse(id).randomness;       // Uint8Array(12), defensive copy
-timestampOf(id);            // number
-
-const bytes = toBinary(id); // Uint8Array(17)
-fromBinary(bytes);          // same 26-character string
-
-generateAt(1_700_000_000);  // explicit timestamp
-isValid(id);                // true
-compare(a, b);              // -1 | 0 | 1
+const bytes = toBinary(id);
+if (!isValid(id) || bytes.length !== 17 || fromBinary(bytes) !== id) {
+  throw new Error('Pikaid round-trip failed');
+}
+console.log(id, parse(id).timestamp);
 ```
 
-### CommonJS
+## 💡 Example Use Case
 
-```js
-const {
-  generate,
-  parse,
-  isValid,
-  PikaidError,
-} = require('pikaid');
+Use pikaid to identify **users, orders, invoices, uploads, events, and API resources**. Independent services can generate compact IDs without a shared counter, while timestamp-based ordering helps with indexing, sorting, and logs.
 
-const id = generate();
-console.log(parse(id).id, isValid(id));
-```
+## 📚 Canonical specification
 
-### TypeScript
+- [Canonical specification](https://github.com/pikaid/pikaid-specs)
+- [Revision 1.0.4](https://github.com/pikaid/pikaid-specs/tree/v1.0.4)
 
-Types ship with the package. Both `import` and `require` resolution are
-supported through the export map, including `node16`/`nodenext` module
-resolution.
+Specification revisions describe the format; they do not change the encoded identifiers.
 
-```ts
-import { Pikaid, type PikaidLike } from 'pikaid';
-
-const value: Pikaid = Pikaid.parse('0s44we8002loz3po6mcf6vsn23');
-const accepted: PikaidLike[] = [value, value.id, value.toBinary()];
-```
-
-## API
+## 🧩 API Reference
 
 ### Generation
 
@@ -216,7 +187,63 @@ All operational failures are `PikaidError` instances with a stable `code`:
 | `CRYPTO_UNAVAILABLE` | Web Crypto is missing or has no `getRandomValues`. |
 | `CRYPTO_FAILURE` | The platform CSPRNG threw; the original error is in `cause`. |
 
-## Ordering and storage
+### ESM
+
+```js
+import {
+  generate,
+  generateAt,
+  parse,
+  isValid,
+  toBinary,
+  fromBinary,
+  timestampOf,
+  compare,
+} from 'pikaid';
+
+const id = generate();
+// '0s44we8002loz3po6mcf6vsn23' (example shape)
+
+parse(id).timestamp;        // number, Unix seconds
+parse(id).randomness;       // Uint8Array(12), defensive copy
+timestampOf(id);            // number
+
+const bytes = toBinary(id); // Uint8Array(17)
+fromBinary(bytes);          // same 26-character string
+
+generateAt(1_700_000_000);  // explicit timestamp
+isValid(id);                // true
+compare(a, b);              // -1 | 0 | 1
+```
+
+### CommonJS
+
+```js
+const {
+  generate,
+  parse,
+  isValid,
+  PikaidError,
+} = require('pikaid');
+
+const id = generate();
+console.log(parse(id).id, isValid(id));
+```
+
+### TypeScript
+
+Types ship with the package. Both `import` and `require` resolution are
+supported through the export map, including `node16`/`nodenext` module
+resolution.
+
+```ts
+import { Pikaid, type PikaidLike } from 'pikaid';
+
+const value: Pikaid = Pikaid.parse('0s44we8002loz3po6mcf6vsn23');
+const accepted: PikaidLike[] = [value, value.id, value.toBinary()];
+```
+
+## 🔄 Order Guarantee
 
 The string form is fixed-width lowercase Base36, so plain ASCII/bytewise
 comparison orders values chronologically by timestamp, then by randomness.
@@ -230,24 +257,23 @@ comparison orders values chronologically by timestamp, then by randomness.
   differ only by randomness; pikaid does **not** guarantee uniqueness. Enforce a
   primary key or unique constraint when uniqueness matters.
 
-## Security notes
+## 🛢 Storage Recommendations
 
-- pikaid provides **96 bits of CSPRNG randomness** per identifier. It is not a
-  secret, capability token, or authentication mechanism.
-- The timestamp is readable by anyone holding the identifier. Do not use pikaid
-  where leaking creation time is unacceptable.
-- There is no checksum. A typo can produce another valid identifier; validate
-  references against authoritative data.
-- The 19-character encoding space is larger than the 96-bit randomness space.
-  Strings above `2^96 - 1` are well formed but invalid, and are rejected.
+| Representation | Size | Recommended for |
+| --- | ---: | --- |
+| **BINARY(17)** | 17 bytes | Compact primary keys and indexes |
+| **CHAR(26)** | 26 characters | Readable SQL, debugging, URLs, and logs |
 
-## Browser support
+Use an **ASCII bytewise/binary collation** for text columns (for example, `ascii_bin` on MariaDB/MySQL). Case-insensitive or locale-aware sorting is not a substitute for canonical bytewise comparison.
 
-The package uses `globalThis.crypto.getRandomValues` and standard ECMAScript
-features. Continuous integration exercises the built package in Chromium,
-Firefox, and WebKit through Playwright.
+## ✅ Verification and release status
 
-## Development
+The [CI workflow](https://github.com/pikaid/pikaid-js/actions/workflows/ci.yml) runs native tests, pinned automated conformance checks, and language-specific quality gates. To run the native checks locally from a checkout, use `npm test`.
+
+**Automated passing tests are not a security certification.** The independent CSPRNG source and failure-path audits (`P-GENERATE-RNG-SOURCE` and `P-GENERATE-RNG-FAILURE`) still require separate human evidence.
+
+<details>
+<summary>Platform, tooling, and conformance details</summary>
 
 ```sh
 npm install
@@ -276,9 +302,35 @@ Conformance fixtures for the auxiliary offline regression live in
 provenance. The authoritative conformance gate is the pinned upstream suite, not
 those copied fixtures.
 
-## License
+</details>
 
-MIT. See [LICENSE](LICENSE).
+Registry publication is not implied by a green CI: use the installation method documented above.
 
-pikaid is specified by the pikaid project. This implementation is independent of
-the PHP implementation but shares its conformance vectors.
+## 🤝 Contributing
+
+Contributions are always welcome! 💙
+
+Whether you're fixing a typo, improving documentation, adding tests, or making pikaid even better, every contribution is appreciated.
+
+**Want to help? Here's how:**
+
+- 🐛 **Found a bug?** [Open an issue](https://github.com/pikaid/pikaid-js/issues) with clear reproduction steps.
+- 💡 **Have an idea?** Start with an issue before making major changes.
+- 🛠️ **Ready to contribute?** Open a pull request explaining your changes.
+- 🧪 **Keep it tested.** Add meaningful regression tests for behavior changes and follow the existing conventions.
+- ✅ **Make sure CI passes.** All required checks must be green before a pull request is merged. No shortcuts!
+
+**One important rule:** pikaid's identifier format is immutable. Contributions must preserve the [canonical specification (revision 1.0.4)](https://github.com/pikaid/pikaid-specs/tree/v1.0.4).
+
+🔐 **Found a security vulnerability?** Report it privately using GitHub's security reporting (when available), or [contact the maintainer](mailto:larananas.dev@proton.me)—not through a public issue.
+
+**Every improvement matters, big or small. Thanks for helping make pikaid better!** 🐇
+
+## 📄 License
+
+The implementation is available under the [MIT License](LICENSE).
+
+## ✉️ Contact
+
+For licensing or project-related questions: [larananas.dev@proton.me](mailto:larananas.dev@proton.me).
+
